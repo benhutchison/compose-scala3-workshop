@@ -35,15 +35,22 @@ import scala.language.implicitConversions
 
 //To create nat literals:
 //import import scala3workshop.nat.macros._
-//nat("7"): Nat
+//nat(7): Nat
 
 
-opaque type Nat = Int
+object Nat {
+  opaque type Nat = Int
 
-//permits an Int that has already been validated to be "cast" to Nat
-//Used by the macro. private prevents it being used by clients
-private[nat] def (nat :Int) toNatUnsafe: Nat = nat 
+  //permits an Int that has already been validated to be "cast" to Nat
+  //Used by the macro. private prevents it being used by clients
+  private[nat] def (nat :Int) toNatUnsafe: Nat = nat 
 
-//TBD maths operations on Nats
+  /** Use toNat to construct Nats at runtime */
+  def (n: Int) toNat: Either[Int, Nat] = Either.cond(n >= 0, n, n)
 
+  given as Ordering[Nat] given (a: Ordering[Int]) = a
+  
+  //TBD maths operations on Nats
+
+}  
 

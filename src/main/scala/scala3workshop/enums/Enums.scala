@@ -1,9 +1,14 @@
-package scala3workshop.ex1_enums
+package scala3workshop.enums
+
+import scala.math.Ordering.Implicits._
 
 import scala.language.implicitConversions
 
 import cats.data.{Validated}
 import cats.implicits._
+
+import scala3workshop.nat.Nat._
+import scala3workshop.nat.macros._
 
 //One welcome change in Scala 3 is the ability to write top level definitions
 //this make Scala 2 "package objects" unncessary and obselete
@@ -23,21 +28,14 @@ object Scala2 {
 
 
 enum Amount {
-  case Exact private[ex1_enums] (n: Int) extends Amount
-  case Range private[ex1_enums] (min: Int, max: Int) extends Amount
+  case Exact (n: Nat) extends Amount
+  case Range private[enums] (min: Nat, max: Nat) extends Amount
   case Unspecified extends Amount
 }
-object Amount {
-  def exact(n: Int): Either[String, Amount] = 
-    Either.cond(n >= 0, Amount.Exact(n), s"Amount $n must be nonnegative. ")
-      
+object Amount {    
 
-  def range(min: Int, max: Int): Either[String, Amount] = (
-    Validated.cond(min >= 0, min, s"Require min >= 0: min=$min. "),
-    Validated.cond(max >= 0, max, s"Require max >= 0: max=$max. "),
-    Validated.cond(min <= max, max, s"Require min <= max: min=$min, max=$max. "),
-  ).mapN((min, max, _) => Amount.Range(min, max)).toEither
-    
+  def range(min: Nat, max: Nat): Either[String, Amount] = 
+    Either.cond(min <= max, Amount.Range(min, max), s"Require min <= max: min=$min, max=$max. ")   
 }
 
 //follow the widespread convention of lower inclusive, upper exclusive bounds
@@ -50,7 +48,7 @@ object Excercises {
   //Each VehicleType should have a `wheels: Amount` parameter
 
   enum VehicleType(wheels: Amount) {
-    case Car extends VehicleType(Amount.Exact(4))
+    case Car extends VehicleType(Amount.Exact(nat(4)))
     //TODO Your code here
   }
 

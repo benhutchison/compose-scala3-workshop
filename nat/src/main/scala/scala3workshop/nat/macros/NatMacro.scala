@@ -8,7 +8,7 @@ import scala.quoted._
 
 import scala.language.implicitConversions
 
-import scala3workshop.nat._
+import scala3workshop.nat.Nat._
 
 
 //Converts a Int constant into a Nat, or emits a compiler error if negative
