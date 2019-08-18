@@ -7,8 +7,7 @@ import scala.quoted._
 
 import scala.language.implicitConversions
 
-import scala3workshop.nat.Nat._
-import scala3workshop.nat.macros._
+import scala3workshop.nat._, Nat._, NatMacros._
 
 val n: Nat = nat(6)
 

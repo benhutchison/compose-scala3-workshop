@@ -54,3 +54,16 @@ object Nat {
 
 }  
 
+object NatMacros {
+  import Nat._ 
+    //Converts a Int constant into a Nat, or emits a compiler error if negative
+  inline def nat(inline n: Int): Nat =
+  ${ natImpl(n) }
+
+  private def natImpl(n: Int) given (ctx: QuoteContext) : Expr[Nat] =
+  if (n < 0) {
+    ctx.error(s"Invalid Nat (require >= 0): $n")
+    ???
+  } else '{ toNatUnsafe( ${n.toExpr} )}
+}
+
