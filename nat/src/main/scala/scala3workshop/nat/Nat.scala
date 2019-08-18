@@ -34,7 +34,7 @@ import scala.language.implicitConversions
 //where it is defined. The current package in this example.
 
 //To create nat literals:
-//import import scala3workshop.nat.macros._
+//import scala3workshop.nat._, Nat._, NatMacros._
 //nat(7): Nat
 
 
