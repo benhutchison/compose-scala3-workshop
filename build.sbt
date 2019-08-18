@@ -7,16 +7,28 @@ lazy val commonSettings = Seq(
 
   libraryDependencies ++= Seq(
     "org.typelevel" %% "cats-core" % "2.0.0-M4",
-    "com.novocode" % "junit-interface" % "0.11" % "test"
+    "org.typelevel" %% "mouse" % "0.22",
+    "org.typelevel" %% "algebra" % "2.0.0-M2"
+,    "com.novocode" % "junit-interface" % "0.11" % "test"
   ).map(_.withDottyCompat(dottyVersion)),
 )
 
 lazy val root = project
   .in(file("."))
+  .dependsOn(nat)
   .settings(
     name := "Melbourne :: Compose 2019 Scala 3 workshop",
     commonSettings
   )
+
+//nat project defines macros. Macros must be defined in a separate project to their usage
+//to ensure they are compiled before being referenced.
+//Note how the root project `.dependsOn(nat)`
+lazy val nat = project
+  .in(file("nat"))
+  .settings(
+    commonSettings
+  )  
 
 lazy val solutions = project
   .in(file("solutions"))
