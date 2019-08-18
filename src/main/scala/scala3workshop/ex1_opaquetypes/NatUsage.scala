@@ -10,9 +10,9 @@ import scala.language.implicitConversions
 import scala3workshop.nat._
 import scala3workshop.nat.macros._
 
-val n: Nat = nat("6")
+val n: Nat = nat(6)
 
-// val n2: Nat = nat("-6")
-// val n3: Nat = nat("")
+// val n2: Nat = nat(-6)
+
 
 
