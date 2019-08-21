@@ -15,7 +15,7 @@ lazy val commonSettings = Seq(
 
 lazy val root = project
   .in(file("."))
-  .dependsOn(nat)
+  .dependsOn(macros)
   .settings(
     name := "Melbourne :: Compose 2019 Scala 3 workshop",
     commonSettings
@@ -24,8 +24,8 @@ lazy val root = project
 //nat project defines macros. Macros must be defined in a separate project to their usage
 //to ensure they are compiled before being referenced.
 //Note how the root project `.dependsOn(nat)`
-lazy val nat = project
-  .in(file("nat"))
+lazy val macros = project
+  .in(file("macros"))
   .settings(
     commonSettings
   )  
