@@ -1,4 +1,4 @@
-package scala3workshop.ex1_opaquetypes
+package scala3workshop.nat
 
 import algebra.ring._
 import mouse.all._
@@ -7,7 +7,6 @@ import scala.quoted._
 
 import scala.language.implicitConversions
 
-import scala3workshop.nat._, Nat._, NatMacros._
 
 val n: Nat = nat(6)
 

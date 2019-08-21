@@ -7,7 +7,7 @@ import scala.language.implicitConversions
 import cats.data.{Validated}
 import cats.implicits._
 
-import scala3workshop.nat._, Nat._, NatMacros._
+import scala3workshop.nat._
 
 
 //One welcome change in Scala 3 is the ability to write top level definitions
