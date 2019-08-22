@@ -7,11 +7,21 @@ import scala.language.implicitConversions
 import cats.data.{Validated}
 import cats.implicits._
 
-import scala3workshop.nat._, Nat._, NatMacros._
+import scala3workshop.nat._
+import scala3workshop.pdecimal._
+import scala3workshop.bound._
 
+/** VehicleCategory encodes the categories defined under the Australian legislation 
+https://www.legislation.gov.au/Details/F2012C00326
+*/
 
 //One welcome change in Scala 3 is the ability to write top level definitions
 //this make Scala 2 "package objects" unncessary and obselete
+
+enum VehicleCategory(wheels: Bound[Nat]) {
+  case PedalCycle extends VehicleCategory(wheels = Bound.inclusive(nat(2), nat(2)))
+
+}
 
 def topLevel = "This is a top level definition"
 type AlsoTopLevel = (String, Int)
