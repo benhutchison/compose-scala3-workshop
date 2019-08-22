@@ -49,6 +49,13 @@ lazy val bound = project
     commonSettings
   )  
 
+//nat project defines macros
+lazy val nat = project
+  .in(file("nat"))
+  .settings(
+    commonSettings
+  )  
+
 lazy val solutions = project
   .in(file("solutions"))
   .dependsOn(root)

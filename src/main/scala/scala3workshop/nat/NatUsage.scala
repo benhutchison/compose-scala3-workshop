@@ -1,7 +1,5 @@
 package scala3workshop.ex1_opaquetypes
 
-import algebra.ring._
-import mouse.all._
 
 import scala.quoted._
 
@@ -13,9 +11,9 @@ val n: Nat = nat(6)
 
 // val n2: Nat = nat(-6)
 
-val n3: Either[Int, Nat] = 6.toNat 
+val n3: Option[Nat] = 6.toNat 
 
-val n4: Either[Int, Nat] = -6.toNat 
+val n4: Option[Nat] = -6.toNat 
 
 
 

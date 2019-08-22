@@ -1,4 +1,4 @@
-package scala3workshop.ex7_macros
+package scala3workshop.macros
 
 import scala.compiletime._
 import scala.quoted._

@@ -11,6 +11,7 @@ import scala3workshop.nat._
 import scala3workshop.pdecimal._
 import scala3workshop.bound._
 
+
 /** VehicleCategory encodes the categories defined under the Australian legislation 
 https://www.legislation.gov.au/Details/F2012C00326
 */

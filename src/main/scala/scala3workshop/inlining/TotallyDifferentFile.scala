@@ -1,4 +1,4 @@
-package scala3workshop.ex6_inline
+package scala3workshop.inlining
 
 object TotallyDifferentFile {
   def somethingElse(): Unit = {
