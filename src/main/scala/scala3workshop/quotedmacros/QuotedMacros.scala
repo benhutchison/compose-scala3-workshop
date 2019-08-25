@@ -5,17 +5,6 @@ import scala.quoted._
 import scala.tasty.Reflection
 
 
-// To experiment with the code in this chapter, either run `console` in sbt and 
-// scala> import scala3workshop.ex7_macros._
-// or run your arbitrary code here with `run`, selecting `Ex7`.
-object Ex7 {
-  def main(args: Array[String]): Unit = {
-    // Put whatever code you want here to play around with the stuff in this chapter
-
-  }
-}
-
-
 inline def macroIf[A, B](inline cond: Boolean, ifTrue: => A, ifFalse: => B) <: Any = 
   ${ macroIfImpl(cond, 'ifTrue, 'ifFalse) }
 

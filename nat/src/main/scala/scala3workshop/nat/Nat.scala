@@ -30,16 +30,15 @@ def natImpl(n: Int) given (qc: QuoteContext): Expr[Nat] = {
     case Some(nat) => nat.toExpr
   }
 }
-/*
-inline def natWhiteBox(n: Int) <: Nat =
+
+inline def natWhiteBox(n: Int) <: Any =
   ${ natWhiteboxImpl('n) }
 
-def natWhiteboxImpl(n: Expr[Int]) given (qc: QuoteContext): Expr[Nat] = {
+def natWhiteboxImpl(n: Expr[Int]) given (qc: QuoteContext) : Expr[Any] = {
   import qc.tasty._
 
   n.unseal match {
-    case Literal(n: Int) if n >= 0 => '{ n.toNat.get }
-    case n => n.toNat
-    qc.error(s"Invalid Nat (require >= 0): $n"); '{Nat.Zero}
+    case Inlined(_, _, Literal(Constant(lit: Int))) if lit >= 0 => '{ $n.toNat.get }
+    case term => term.seal
   }
-}*/
+}
