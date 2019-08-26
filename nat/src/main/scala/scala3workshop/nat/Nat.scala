@@ -1,7 +1,7 @@
 package scala3workshop.nat
 
-
 import scala.quoted._
+import scala.quoted.matching.Const
 
 export Nat.Nat
 export Nat.toNat
@@ -35,10 +35,8 @@ inline def natWhiteBox(n: Int) <: Any =
   ${ natWhiteboxImpl('n) }
 
 def natWhiteboxImpl(n: Expr[Int]) given (qc: QuoteContext) : Expr[Any] = {
-  import qc.tasty._
-
-  n.unseal match {
-    case Inlined(_, _, Literal(Constant(lit: Int))) if lit >= 0 => '{ $n.toNat.get }
-    case term => term.seal
+  n match {
+    case Const(lit) if lit >= 0 => '{ $n.toNat.get }
+    case term => term
   }
 }
