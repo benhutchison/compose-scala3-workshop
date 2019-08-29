@@ -20,7 +20,7 @@ https://www.legislation.gov.au/Details/F2012C00326
 //this make Scala 2 "package objects" unncessary and obselete
 
 enum VehicleCategory(wheels: Bound[Nat]) {
-  case PedalCycle extends VehicleCategory(wheels = Bound.inclusive(nat(2), nat(2)))
+  case PedalCycle extends VehicleCategory(wheels = BoundOps.inclusive(nat(2), nat(2)))
 
 }
 
