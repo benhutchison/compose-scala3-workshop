@@ -11,6 +11,7 @@ lazy val commonSettings = Seq(
     "org.typelevel" %% "algebra" % "2.0.0-M2",
     "com.novocode" % "junit-interface" % "0.11" % Test,
     "org.specs2" %% "specs2-core" % "4.6.0" % Test,
+    "org.scalacheck" %% "scalacheck" % "1.14.0" % Test,
   ).map(_.withDottyCompat(dottyVersion)),
 )
 
@@ -27,8 +28,8 @@ lazy val root = project
 //nat project defines macros. Macros must be defined in a separate project to their usage
 //to ensure they are compiled before being referenced.
 //Note how the root project `.dependsOn(nat)`
-lazy val macros = project
-  .in(file("macros"))
+lazy val nat = project
+  .in(file("nat"))
   .settings(
     commonSettings
   )  
