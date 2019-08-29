@@ -48,14 +48,7 @@ lazy val bound = project
   .in(file("bound"))
   .settings(
     commonSettings
-  )  
-
-//nat project defines macros
-lazy val nat = project
-  .in(file("nat"))
-  .settings(
-    commonSettings
-  )  
+  )   
 
 lazy val solutions = project
   .in(file("solutions"))
