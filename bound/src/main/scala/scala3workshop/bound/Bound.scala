@@ -28,7 +28,7 @@ object BoundOps {
   import Bound._, BoundSide._
 
   def (bound: Bound[T]) accepts[T: Ordering](t: T) = bound match {
-    case Interval(lo, hi) => Boundary.accepts(lo, t, Lower) && Boundary.accepts(hi, t, Upper) 
+    case Interval(lo, hi) => Boundary.accepts(lo, t, Lower()) && Boundary.accepts(hi, t, Upper()) 
     case HalfBound(b, side) => Boundary.accepts(b, t, side)
     case Exact(value) => t == value
     case Unbounded() => true
@@ -45,13 +45,13 @@ object BoundOps {
  
   def inclusive[T: Ordering](a: T, b: T): Bound[T] = {
     val lohi = if (a <= b) (a, b) else (b, a)
-      Bound.Interval(Boundary(lohi._1, BoundaryType.Inclusive), Boundary(lohi._2, BoundaryType.Inclusive))
+      Bound.Interval(Boundary(lohi._1, BoundaryType.Inclusive()), Boundary(lohi._2, BoundaryType.Inclusive()))
   }
 
-  def gt[T](value: T): Bound[T] = Bound.HalfBound(Boundary.exclusive(value), Lower)
-  def gte[T](value: T): Bound[T]  = Bound.HalfBound(Boundary.inclusive(value), Lower)
-  def lt[T](value: T): Bound[T]  = Bound.HalfBound(Boundary.exclusive(value), Upper)
-  def lte[T](value: T): Bound[T]  = Bound.HalfBound(Boundary.inclusive(value), Upper)
+  def gt[T](value: T): Bound[T] = Bound.HalfBound(Boundary.exclusive(value), Lower())
+  def gte[T](value: T): Bound[T]  = Bound.HalfBound(Boundary.inclusive(value), Lower())
+  def lt[T](value: T): Bound[T]  = Bound.HalfBound(Boundary.exclusive(value), Upper())
+  def lte[T](value: T): Bound[T]  = Bound.HalfBound(Boundary.inclusive(value), Upper())
 
   /** Convex hull or union of a pair of Bounds, being smallest single Bound that accepts all values
    * the pair accept.
@@ -63,21 +63,21 @@ object BoundOps {
     case (Empty(), x) => x
     case (x, Empty()) => x
 
-    case (HalfBound(_, Lower), HalfBound(_, Upper)) => Unbounded()
-    case (HalfBound(_, Upper), HalfBound(_, Lower)) => Unbounded()
+    case (HalfBound(_, Lower()), HalfBound(_, Upper())) => Unbounded()
+    case (HalfBound(_, Upper()), HalfBound(_, Lower())) => Unbounded()
 
-    case (HalfBound(l1, Lower), HalfBound(l2, Lower)) => HalfBound(l1.min(l2), Lower)
-    case (HalfBound(h1, Upper), HalfBound(h2, Upper)) => HalfBound(h1.max(h2), Upper)
+    case (HalfBound(l1, Lower()), HalfBound(l2, Lower())) => HalfBound(l1.min(l2), Lower())
+    case (HalfBound(h1, Upper()), HalfBound(h2, Upper())) => HalfBound(h1.max(h2), Upper())
 
-    case (HalfBound(h1, Upper), Interval(l, h2)) => HalfBound(h1.max(h2), Upper)
-    case (HalfBound(h1, Upper), Exact(h2)) => HalfBound(h1.max(Boundary.inclusive(h2)), Upper)
-    case (Interval(l, h1), HalfBound(h2, Upper)) => HalfBound(h1.max(h2), Upper)
-    case (Exact(h1), HalfBound(h2, Upper)) => HalfBound(Boundary.inclusive(h1).max(h2), Upper)
+    case (HalfBound(h1, Upper()), Interval(l, h2)) => HalfBound(h1.max(h2), Upper())
+    case (HalfBound(h1, Upper()), Exact(h2)) => HalfBound(h1.max(Boundary.inclusive(h2)), Upper())
+    case (Interval(l, h1), HalfBound(h2, Upper())) => HalfBound(h1.max(h2), Upper())
+    case (Exact(h1), HalfBound(h2, Upper())) => HalfBound(Boundary.inclusive(h1).max(h2), Upper())
 
-    case (HalfBound(l1, Lower), Interval(l2, h)) => HalfBound(l1.min(l2), Lower)
-    case (HalfBound(l1, Lower), Exact(l2)) => HalfBound(l1.min(Boundary.inclusive(l2)), Lower)
-    case (Interval(l1, h), HalfBound(l2, Lower)) => HalfBound(l1.min(l2), Lower)
-    case (Exact(l1), HalfBound(l2, Lower)) => HalfBound(Boundary.inclusive(l1).min(l2), Lower)
+    case (HalfBound(l1, Lower()), Interval(l2, h)) => HalfBound(l1.min(l2), Lower())
+    case (HalfBound(l1, Lower()), Exact(l2)) => HalfBound(l1.min(Boundary.inclusive(l2)), Lower())
+    case (Interval(l1, h), HalfBound(l2, Lower())) => HalfBound(l1.min(l2), Lower())
+    case (Exact(l1), HalfBound(l2, Lower())) => HalfBound(Boundary.inclusive(l1).min(l2), Lower())
 
     case (Interval(lo, hi), Interval(l, h)) => Interval(lo.min(l), hi.max(h))
     case (Interval(lo, hi), Exact(v)) => {
@@ -90,6 +90,17 @@ object BoundOps {
     }
     case (Exact(v1), Exact(v2)) => Interval(Boundary.inclusive(v1.min(v2)), Boundary.inclusive(v1.max(v2)))
   }
+
+  //min and max are both the "most extreme" value, but in different directions 
+  def min[T](x: Boundary[T], y: Boundary[T]) given (o: Ordering[T]) = 
+   extremum(x, y) given o.reverse
+
+  def max[T](x: Boundary[T], y: Boundary[T]) given (o: Ordering[T]) = 
+    extremum(x, y) given o
+
+  private def extremum[T](x: Boundary[T], y: Boundary[T]) given (extremumOrd: Ordering[T]): Boundary[T] =
+    //when the boundary points are equally extreme, prefer one with an () BoundaryType
+    (the[Ordering[Boundary[T]]] given Ordering.by(b => (b.value, b.typ))).max(x, y)
 
   //there are two Monoid interpretations, based on the union or intersection
   //of Bounds. We use union here arbitrarily.
@@ -111,34 +122,24 @@ object Boundary {
   import BoundaryType._
   import BoundSide._
 
-  def inclusive[T](value: T) = Boundary(value, Inclusive)
-  def exclusive[T](value: T) = Boundary(value, Exclusive)
+  def inclusive[T](value: T) = Boundary(value, Inclusive())
+  def exclusive[T](value: T) = Boundary(value, Exclusive())
 
   def accepts[T: Ordering](b: Boundary[T], t: T, side: BoundSide) = (side, b.typ) match {
-    case (Lower, Inclusive) => t >= b.value
-    case (Lower, Exclusive) => t > b.value
-    case (Upper, Inclusive) => t <= b.value
-    case (Upper, Exclusive) => t < b.value
+    case (Lower(), Inclusive()) => t >= b.value
+    case (Lower(), Exclusive()) => t > b.value
+    case (Upper(), Inclusive()) => t <= b.value
+    case (Upper(), Exclusive()) => t < b.value
   }
 
   given [T] as Ordering[Boundary[T]] given Ordering[T] = 
     Ordering.by(b => (b.value, b.typ))
 
-
-  //min and max are both the "most extreme" value, but in different directions 
-  def min[T](x: Boundary[T], y: Boundary[T]) given (o: Ordering[T]) = 
-    extremum(x, y) given o.reverse
-
-  def max[T](x: Boundary[T], y: Boundary[T]) given (o: Ordering[T]) = 
-    extremum(x, y) given o
-
-  private def extremum[T](x: Boundary[T], y: Boundary[T]) given (extremumOrd: Ordering[T]): Boundary[T] =
-    //when the boundary points are equally extreme, prefer one with an Inclusive BoundaryType
-    (the[Ordering[Boundary[T]]] given Ordering.by(b => (b.value, b.typ))).max(x, y)
-
 }
+
 enum BoundaryType {
-  case Exclusive /* open */, Inclusive /* closed */
+  case Exclusive() /* open */
+  case Inclusive() /* closed */
 }
 object BoundaryType {
   //ordinal is provided for enums automatically, reflecting position in the list
@@ -148,5 +149,6 @@ object BoundaryType {
 }
 
 enum BoundSide {
-  case Lower, Upper
+  case Lower()
+  case Upper()
 }

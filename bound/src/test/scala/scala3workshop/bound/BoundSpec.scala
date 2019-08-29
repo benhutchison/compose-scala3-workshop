@@ -1,7 +1,7 @@
 package scala3workshop.bound
 
 import BoundOps._
-import BoundaryType._
+
 
 import scala.Predef.{any2stringadd => _}
 
@@ -20,17 +20,15 @@ import scala.language.implicitConversions
 import scala.language.strictEquality
 
 
-object BoundSpec extends Specification {
+class BoundSpec extends Specification {
 
-  val i = BoundaryType.Inclusive
-  val e = BoundaryType.Exclusive
-  val genBoundaryType: Gen[BoundaryType] = Gen.oneOf(i, e)
+  val genBoundaryType: Gen[BoundaryType] = Gen.oneOf(BoundaryType.Inclusive(), BoundaryType.Exclusive())
   val genBoundary: Gen[Boundary[Double]] = for {
     value <- arbitrary[Double]
     typ <- genBoundaryType
   } yield Boundary(value, typ)
 
-  val genSide: Gen[BoundSide] = Gen.oneOf(BoundSide.Lower, BoundSide.Upper)
+  val genSide: Gen[BoundSide] = Gen.oneOf(BoundSide.Lower(), BoundSide.Upper())
   val genInterval: Gen[Bound[Double]] = for {
     b1 <- genBoundary
     b2 <- genBoundary
@@ -59,8 +57,8 @@ object BoundSpec extends Specification {
   val pointOnLo = 2.0
   val pointAboveLo = 2.01
   val pointBelowHi = 2.99
-  val pointOnHi = 2.0
-  val pointAboveHi = 2.01
+  val pointOnHi = 3.0
+  val pointAboveHi = 3.01
 
   val inclusive2to3 = BoundOps.inclusive(pointOnLo, pointOnHi)
   val gte2 = BoundOps.gte(pointOnLo)

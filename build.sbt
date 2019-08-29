@@ -1,4 +1,4 @@
-val dottyVersion = "0.17.0-RC1"
+val dottyVersion = "0.18.1-bin-20190828-78d043a-NIGHTLY"
 
 lazy val commonSettings = Seq(
   version := "0.1.0",
