@@ -19,10 +19,76 @@ https://www.legislation.gov.au/Details/F2012C00326
 //One welcome change in Scala 3 is the ability to write top level definitions
 //this make Scala 2 "package objects" unncessary and obselete
 
-enum VehicleCategory(wheels: Bound[Nat]) {
-  case PedalCycle extends VehicleCategory(wheels = BoundOps.inclusive(nat(2), nat(2)))
+enum Constraint[T] {
+  case Is(value: T) extends Constraint[T]
+  case Not(constraint: Constraint[T]) extends Constraint[T]
+  case Or(c1: Constraint[T], c2: Constraint[T]) extends Constraint[T]
+  case And(c1: Constraint[T], c2: Constraint[T]) extends Constraint[T]
+}
+
+val Unlimited = Bound.Unbounded[Nat]()
+
+enum PowerSource {
+
+  case Human extends PowerSource
+  
+  case Electric(powerWatts: Bound[Nat] = Unlimited) extends PowerSource
+  
+  case Piston(powerWatts: Bound[Nat] = Unlimited, cylinderSizeMl: Bound[Nat] = Unlimited) 
+    extends PowerSource
 
 }
+
+import Bound._, BoundOps._, Constraint._, PowerSource._
+enum VehicleCategory(name: String, categoryCode: (Char, Char), options: Criteria*) {
+  
+
+  case PedalCycle extends VehicleCategory(
+    name = "PEDAL CYCLE",
+    categoryCode = ('A', 'A'),
+    Criteria(
+      wheels = BoundOps.inclusive(nat(2), nat(2)),
+      powerSource = Constraint.Is(PowerSource.Human))
+  )
+
+  case PowerAssistedPedalCycle extends VehicleCategory(
+    name = "POWER-ASSISTED PEDAL CYCLE",
+    categoryCode = ('A', 'B'),
+    Criteria(
+      wheels = Exact(nat(2)),
+      powerSource = And(Is(Human), Or(Is(Electric(powerWatts = lte(nat(200)))), Is(Piston(powerWatts = lte(nat(200))))))),
+    Criteria(
+      wheels = Exact(nat(2)),
+      powerSource = And(Is(Human), Is(Electric(powerWatts = lte(nat(250))))),
+      poweredSpeedKmh = lte(nat(25)))
+  )
+
+  case Moped2Wheel extends VehicleCategory(
+    name = "MOPED 2 wheels",
+    categoryCode = ('L', 'A'),
+    Criteria(
+      wheels = Exact(nat(2)),
+      powerSource = Is(Piston(cylinderSizeMl = lte(nat(50)))),
+      poweredSpeedKmh = lte(nat(50))
+    ),
+    Criteria(
+      wheels = Exact(nat(2)),
+      powerSource = Is(Electric()),
+      poweredSpeedKmh = lte(nat(50)))
+  )
+
+
+
+  
+
+}
+case class Criteria(
+  wheels: Bound[Nat],
+  powerSource: Constraint[PowerSource],
+  poweredSpeedKmh: Bound[Nat] = Unlimited,
+)
+
+
 
 def topLevel = "This is a top level definition"
 type AlsoTopLevel = (String, Int)
