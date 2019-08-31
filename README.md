@@ -8,3 +8,15 @@ It is also about to receive a dramatic overhaul! Scala 3, due to be released nex
 Let's learn it!
 
 Whether you're a grizzled Scala veteran or new to Scala & FP, this workshop will help you get going with Scala 3, get familiar with the features and how to use them.
+
+## Installation
+
+Assuming you have a recent JVM installed:
+
+1. Install sbt: https://www.scala-sbt.org/download.html
+
+2. Clone this repo
+
+3. run `sbt test` to download all the things
+
+It's best to do this on a fast internet connection before the conference, if you are able to. 
