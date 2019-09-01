@@ -38,13 +38,14 @@ object PDecimal {
 
   given as Eql[PDecimal, PDecimal] = Eql.derived
   given [T] as Eql[Either[T, PDecimal], Either[T, PDecimal]] given (et: Eql[T, T]) = Eql.derived
-  
+  given as Ordering[PDecimal] given (a: Ordering[BigDecimal]) = a
 
-  //TODO define an Ordering
 
-  //TODO define a algebra.ring.Rig
-  //TODO define a algebra.ring.MultiplicativeGroup
-  //TODO define operators
+  given as algebra.ring.Rig[PDecimal] = algebra.instances.bigDecimal.bigDecimalAlgebra
+  given as algebra.ring.MultiplicativeGroup[PDecimal] = algebra.instances.bigDecimal.bigDecimalAlgebra
+  @alpha("plus") def (n: PDecimal) + (m: PDecimal) given (r: algebra.ring.Rig[PDecimal]) = r.plus(n, m)
+  @alpha("times") def (n: PDecimal) * (m: PDecimal) given (r: algebra.ring.Rig[PDecimal]) = r.times(n, m)
+  @alpha("div") def (n: PDecimal) / (m: PDecimal) given (g: algebra.ring.MultiplicativeGroup[PDecimal]) = g.div(n, m)
 }  
 
 private def PDecimalImpl(s: String) given (qc: QuoteContext): Expr[PDecimal] = {

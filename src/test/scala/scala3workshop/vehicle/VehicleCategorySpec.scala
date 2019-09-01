@@ -27,6 +27,10 @@ class VehicleCategorySpec extends Specification {
       roadUse = RoadUse.OnRoadUse(),
 
     ).category must_== VehicleCategory.PedalCycle().asRight[CategorisationFail]}
+
+  //TODO write a spec for a MotorTricycle
+
+  //TODO write a spec for a ForwardControlPassengerVehicle
   
   
 

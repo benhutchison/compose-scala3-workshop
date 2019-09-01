@@ -52,4 +52,30 @@ Bounds are an sbtraction for describing a range of number values that are accept
 
 ### [Vehicles and VehicleCategories](src)
 
-With all the above tools working, we can define a DSL for describing vehicle categories. Our DSL should nebale us to classify a vehicle instances, based upon its characteristics.
+With all the above tools working, we can define a DSL for describing vehicle categories. Our DSL should enbale us to classify a vehicle instances, based upon its characteristics.
+
+## Exercises
+
+### Complete PDecimal
+
+Ensure the `PDecimal` spec will compile and pass by completing the implemenation. Use `Nat` as your guide. 
+
+One difference is that, as a fractional number, `PDecimal` is able to safely define a division operator, which comes from [MultiplicativeGroup](https://github.com/typelevel/algebra/blob/master/core/src/main/scala/algebra/ring/Multiplicative.scala#L78).
+
+### Complete VehicleCategory
+
+- Use the vehicle category DSL to define the missing Medium Goods Vehicle category
+
+- Verify the DSL can correctly categorise vehicle instances by extending `VehicleCategorySpec`
+with tests for `MotorTricycle` and `ForwardControlPassengerVehicle`.
+
+### More Difficult Challenges
+
+Examine the `hull` operator defined for Bounds, which finds the convex hull of a pair of bounds.
+
+- Can you write a Scalacheck property thet asserts that the hull of any two bounds should always
+contain any points contained in either component bound?
+
+- The implementation of `hull` has many cases and can be difficult to follow. Can it be made
+simpler and more readable? Note how there is a repetitive structure caused by the symmetry of the first and second components. For example, we have a case for an `Interval` paired with an `Exact` bound, and then the exact same but in reverse order, a, `Exact` paired with an `Interval`. Is there any way we can factor out the shared structure here to yield a more concise implementation? 
+
