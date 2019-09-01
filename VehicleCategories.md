@@ -24,9 +24,9 @@ With  complex domain, there are many possible approaches, and different aspects 
 
 
 
-## Strongly Typed, Total Functional Programming
+## Strongly Typed Functional Programming with Total functions
 
-My Approach is founded on the idea of *strongly typed, total functional programming*, making a few pragmatic concessions to focus on getting the most cost-effective value. I believe strongly typed total functional programming approaches tend to deliver composeable, correct and bit-rot resistant code that will have the lowest total-cost-of-ownership over a system's life (ie cost of development and all maintenance).
+My Approach is founded on the idea of *strongly typed functional programming with total functions*, making a few pragmatic concessions to focus on getting the most cost-effective value. I believe programming with strongly typed total functions approaches tend to deliver composeable, correct and bit-rot resistant code that will have the lowest total-cost-of-ownership over a system's life (ie cost of development and all maintenance).
 
 What does *total* imply over any other kind of functional programming? Well, typically people think of total FP as guaranteeing *termination* over and above regular FP; that is, the absence of infinite loops. My pragmatic experience to date has been that infite loops aren't a major problem, so Im not going to emphasize that aspect of totality. Rather, Im going to tackle the problem of abnormal termination (ie exceptional conditions), which (much more than infinite loops) are a regular hazard for the working softare engineer. 
 
