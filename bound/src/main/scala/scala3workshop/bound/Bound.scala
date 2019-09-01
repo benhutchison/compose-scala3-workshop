@@ -37,16 +37,11 @@ object BoundOps {
 
 
 
-  def interval[T: Ordering](lower: Boundary[T], upper: Boundary[T]): Either[String, Bound[T]] = 
-    if (lower.value <= upper.value)
-      Bound.Interval(lower, upper).asRight[String]
-    else
-      s"A closed interval requires lower <= upper: lower=$lower, upper=$upper".asLeft[Bound[T]]
+  def interval[T: Ordering](b1: Boundary[T], b2: Boundary[T]): Bound[T] = 
+    Bound.Interval(b1.min(b2), b1.max(b2))
  
-  def inclusive[T: Ordering](a: T, b: T): Bound[T] = {
-    val lohi = if (a <= b) (a, b) else (b, a)
-      Bound.Interval(Boundary(lohi._1, BoundaryType.Inclusive()), Boundary(lohi._2, BoundaryType.Inclusive()))
-  }
+  def inclusiveInterval[T: Ordering](b1: T, b2: T): Bound[T] =
+    Bound.Interval(Boundary.inclusive(b1.min(b2)), Boundary.inclusive(b1.max(b2)))
 
   def gt[T](value: T): Bound[T] = Bound.HalfBound(Boundary.exclusive(value), Lower())
   def gte[T](value: T): Bound[T]  = Bound.HalfBound(Boundary.inclusive(value), Lower())

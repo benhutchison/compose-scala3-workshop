@@ -32,7 +32,7 @@ class BoundSpec extends Specification {
   val genInterval: Gen[Bound[Double]] = for {
     b1 <- genBoundary
     b2 <- genBoundary
-  } yield BoundOps.interval(b1.min(b2), b1.max(b2)).right.get
+  } yield BoundOps.interval(b1.min(b2), b1.max(b2))
 
   val genHalfBound: Gen[Bound[Double]] = for {
     b <- genBoundary
@@ -60,7 +60,7 @@ class BoundSpec extends Specification {
   val pointOnHi = 3.0
   val pointAboveHi = 3.01
 
-  val inclusive2to3 = BoundOps.inclusive(pointOnLo, pointOnHi)
+  val inclusive2to3 = BoundOps.inclusiveInterval(pointOnLo, pointOnHi)
   val gte2 = BoundOps.gte(pointOnLo)
   val gt2 = BoundOps.gt(pointOnLo)
   val lt2 = BoundOps.lt(pointOnLo)
