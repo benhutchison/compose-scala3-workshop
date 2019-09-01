@@ -10,9 +10,19 @@ import scala.math.Ordering.Implicits._
 
 import scala.language.implicitConversions
 
+import BoundSide._
 
 /** A set or range of acceptable values in an ordered set of T values */
 enum Bound[T] {
+
+  def accepts(t: T) given Ordering[T] = this match {
+    case Interval(lo, hi) => Boundary.accepts(lo, t, Lower()) && Boundary.accepts(hi, t, Upper()) 
+    case HalfBound(b, side) => Boundary.accepts(b, t, side)
+    case Exact(value) => t == value
+    case Unbounded() => true
+    case Empty() => false
+  }
+
   /** Accepts all values between lo and hi */
   case Interval private[bound] (lo: Boundary[T], hi: Boundary[T] ) extends Bound[T]
   /** Accepts all values on `side` of boundary `b` */
@@ -25,17 +35,7 @@ enum Bound[T] {
   case Empty[T]() extends Bound[T]
 }
 object BoundOps {
-  import Bound._, BoundSide._
-
-  def (bound: Bound[T]) accepts[T: Ordering](t: T) = bound match {
-    case Interval(lo, hi) => Boundary.accepts(lo, t, Lower()) && Boundary.accepts(hi, t, Upper()) 
-    case HalfBound(b, side) => Boundary.accepts(b, t, side)
-    case Exact(value) => t == value
-    case Unbounded() => true
-    case Empty() => false
-  } 
-
-
+  import Bound._
 
   def interval[T: Ordering](b1: Boundary[T], b2: Boundary[T]): Bound[T] = 
     Bound.Interval(b1.min(b2), b1.max(b2))

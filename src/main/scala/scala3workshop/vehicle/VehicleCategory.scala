@@ -1,6 +1,8 @@
-package scala3workshop.enums
+package scala3workshop.vehicle
 
 import scala.math.Ordering.Implicits._
+
+import scala.collection.immutable.ArraySeq
 
 import scala.language.implicitConversions
 
@@ -19,19 +21,13 @@ https://www.legislation.gov.au/Details/F2012C00326
 //One welcome change in Scala 3 is the ability to write top level definitions
 //this make Scala 2 "package objects" unncessary and obselete
 
-enum Constraint[T] {
-  case Any[T]() extends Constraint[T]
-  case Is(value: T) extends Constraint[T]
-  case Not(constraint: Constraint[T]) extends Constraint[T]
-  case Or(c1: Constraint[T], c2: Constraint[T]) extends Constraint[T]
-  case And(c1: Constraint[T], c2: Constraint[T]) extends Constraint[T]
-}
+import Bound._, BoundOps._, Boundary._, Constraint._, PowerSource._, Purpose._, RoadUse._
 
 def Unlimited[T] = Bound.Unbounded[T]()
 
 enum PowerSource {
 
-  case Human extends PowerSource
+  case Human() extends PowerSource
   
   case Electric(powerWatts: Bound[Nat] = Unlimited) extends PowerSource
   
@@ -40,31 +36,89 @@ enum PowerSource {
 
 }
 
-import Bound._, BoundOps._, Boundary._, Constraint._, PowerSource._, Purpose._, RoadUse._
-enum VehicleCategory(name: String, categoryCode: (Char, Char), options: Criteria*) {
-  
+enum Purpose {
+  case Passenger()
+  case Goods()
+}
+enum RoadUse {
+  case OnRoadUse()
+  case OffRoadUse()
+}
 
-  case PedalCycle extends VehicleCategory(
+case class Criteria(
+  wheels: Bound[Nat] = Unlimited,
+  powerSource: Constraint[PowerSource] = Any[PowerSource](),
+  poweredSpeedKmh: Bound[Nat] = Unlimited,
+  grossVehicleMassTonnes: Bound[PDecimal] = Unlimited,
+  notBeing: Seq[VehicleCategory] = Seq.empty,
+  seatingPositions: Bound[Nat] = Unlimited,
+  primaryPurpose: Purpose = Passenger(),
+  steeringWheelPositionInVehicleLength: Constraint[Option[PDecimal]] = Any(),
+  roadUse: RoadUse = OnRoadUse(),
+)
+
+case class Vehicle(
+  wheels: Nat,
+  powerSource: PowerSource,
+  maxPoweredSpeedKmh: Nat,
+  grossVehicleMassTonnes: PDecimal,
+  seatingPositions: Nat,
+  primaryPurpose: Purpose,
+  steeringWheelPositionInVehicleLength: Option[PDecimal],
+  roadUse: RoadUse, 
+) {
+
+  def category: Either[CategorisationFail, VehicleCategory] =
+    VehicleCategory.values.filter(_.accepts(this)) match {
+      case Seq(cat) => cat.asRight
+      case Seq() => CategorisationFail.NoCategory(this).asLeft
+      case multipleCategories: Seq[VehicleCategory] => 
+        CategorisationFail.MultipleCategories(this, multipleCategories).asLeft
+    }
+
+}
+
+enum CategorisationFail {
+  case NoCategory(v: Vehicle)
+  case MultipleCategories(v: Vehicle, categories: Seq[VehicleCategory])
+}
+
+
+enum VehicleCategory(val name: String, val categoryCode: (Char, Char), val options: Criteria*) {
+
+  def accepts(v: Vehicle): Boolean = this.options.exists(criteria => 
+    criteria.wheels.accepts(v.wheels) &&
+    criteria.powerSource.accepts(v.powerSource) &&
+    criteria.poweredSpeedKmh.accepts(v.maxPoweredSpeedKmh) &&
+    criteria.grossVehicleMassTonnes.accepts(v.grossVehicleMassTonnes) &&
+    !criteria.notBeing.exists(otherCategory => otherCategory.accepts(v)) &&
+    criteria.seatingPositions.accepts(v.seatingPositions) &&
+    criteria.primaryPurpose == v.primaryPurpose &&
+    criteria.steeringWheelPositionInVehicleLength.accepts(v.steeringWheelPositionInVehicleLength) &&
+    criteria.roadUse == v.roadUse
+  )
+
+  case PedalCycle() extends VehicleCategory(
     name = "PEDAL CYCLE",
     categoryCode = ('A', 'A'),
     Criteria(
       wheels = inclusiveInterval(nat(2), nat(2)),
-      powerSource = Constraint.Is(PowerSource.Human))
+      powerSource = Constraint.Is(PowerSource.Human()))
   )
 
-  case PowerAssistedPedalCycle extends VehicleCategory(
+  case PowerAssistedPedalCycle() extends VehicleCategory(
     name = "POWER-ASSISTED PEDAL CYCLE",
     categoryCode = ('A', 'B'),
     Criteria(
       wheels = Exact(nat(2)),
-      powerSource = And(Is(Human), Or(Is(Electric(powerWatts = lte(nat(200)))), Is(Piston(powerWatts = lte(nat(200))))))),
+      powerSource = And(Is(Human()), Or(Is(Electric(powerWatts = lte(nat(200)))), Is(Piston(powerWatts = lte(nat(200))))))),
     Criteria(
       wheels = Exact(nat(2)),
-      powerSource = And(Is(Human), Is(Electric(powerWatts = lte(nat(250))))),
+      powerSource = And(Is(Human()), Is(Electric(powerWatts = lte(nat(250))))),
       poweredSpeedKmh = lte(nat(25)))
   )
 
-  case Moped2Wheel extends VehicleCategory(
+  case Moped2Wheel() extends VehicleCategory(
     name = "MOPED 2 wheels",
     categoryCode = ('L', 'A'),
     Criteria(
@@ -78,7 +132,7 @@ enum VehicleCategory(name: String, categoryCode: (Char, Char), options: Criteria
       poweredSpeedKmh = lte(nat(50)))
   )
 
-  case Motorcycle extends VehicleCategory(
+  case Motorcycle() extends VehicleCategory(
     name = "MOTOR CYCLE",
     categoryCode = ('L', 'C'),
     Criteria(
@@ -90,7 +144,7 @@ enum VehicleCategory(name: String, categoryCode: (Char, Char), options: Criteria
       poweredSpeedKmh = gt(nat(50))),
   )
 
-  case MotorTricycle extends VehicleCategory(
+  case MotorTricycle() extends VehicleCategory(
     name = "MOTOR TRICYCLE",
     categoryCode = ('L', 'E'),
     Criteria(
@@ -99,136 +153,89 @@ enum VehicleCategory(name: String, categoryCode: (Char, Char), options: Criteria
       grossVehicleMassTonnes = lte(pdecimal("1.0")),
     ),
     Criteria(
-      wheels = Exact(nat(2)),
+      wheels = Exact(nat(3)),
       poweredSpeedKmh = gt(nat(50)),
       grossVehicleMassTonnes = lte(pdecimal("1.0"))),
   )
 
   
-  case PassengerCar extends VehicleCategory(
+  case PassengerCar() extends VehicleCategory(
     name = "PASSENGER CAR",
     categoryCode = ('M', 'A'),
     Criteria(
       wheels = gte(nat(4)),
       seatingPositions = lte(nat(9)),
-      notBeing = Seq(ForwardControlPassengerVehicle, OffRoadPassengerVehicle),
+      notBeing = Seq(ForwardControlPassengerVehicle(), OffRoadPassengerVehicle()),
     )
   )
 
-  case ForwardControlPassengerVehicle extends VehicleCategory(
+  case ForwardControlPassengerVehicle() extends VehicleCategory(
     name = "FORWARD-CONTROL PASSENGER VEHICLE",
     categoryCode = ('M', 'B'),
     Criteria(
       wheels = gte(nat(4)),
       seatingPositions = lte(nat(9)),
-      steeringWheelPositionInVehicleLength = lte(pdecimal("0.25")),
-      notBeing = Seq(OffRoadPassengerVehicle),
+      steeringWheelPositionInVehicleLength = ExistsWithin(lte(pdecimal("0.25")), the[Ordering[PDecimal]]),
+      notBeing = Seq(OffRoadPassengerVehicle()),
     )
   )
 
-  case OffRoadPassengerVehicle extends VehicleCategory(
+  case OffRoadPassengerVehicle() extends VehicleCategory(
     name = "FORWARD-CONTROL PASSENGER VEHICLE",
     categoryCode = ('M', 'C'),
     Criteria(
       wheels = gte(nat(4)),
       seatingPositions = lte(nat(9)),
-      roadUse = OffRoadUse,
+      roadUse = OffRoadUse(),
     )
   )
 
-  case LightGoodsVehicle extends VehicleCategory(
+  case LightGoodsVehicle() extends VehicleCategory(
     name = "LIGHT GOODS VEHICLE",
     categoryCode = ('N', 'A'),
     Criteria(
       wheels = gte(nat(4)),
       grossVehicleMassTonnes = lte(pdecimal("3.5")),
-      primaryPurpose = Goods,
+      primaryPurpose = Goods(),
     )
   )
 
-  case MediumGoodsVehicle extends VehicleCategory(
+  case MediumGoodsVehicle() extends VehicleCategory(
     name = "MEDIUM GOODS VEHICLE",
     categoryCode = ('N', 'B'),
     Criteria(
       wheels = gte(nat(4)),
       grossVehicleMassTonnes = interval(exclusive(pdecimal("3.5")), inclusive(pdecimal("12.0"))),
-      primaryPurpose = Goods,
+      primaryPurpose = Goods(),
     )
   )
 
-  case HeavyGoodsVehicle extends VehicleCategory(
+  case HeavyGoodsVehicle() extends VehicleCategory(
     name = "HEAVY GOODS VEHICLE",
     categoryCode = ('N', 'C'),
     Criteria(
       wheels = gte(nat(4)),
       grossVehicleMassTonnes = gt(pdecimal("12.0")),
-      primaryPurpose = Goods,
+      primaryPurpose = Goods(),
     )
   )
 
 }
 
-enum Purpose {
-  case Passenger, Goods
-}
-enum RoadUse {
-  case OnRoadUse, OffRoadUse
-}
+object VehicleCategory {
 
-
-case class Criteria(
-  wheels: Bound[Nat] = Unlimited,
-  powerSource: Constraint[PowerSource] = Any[PowerSource](),
-  poweredSpeedKmh: Bound[Nat] = Unlimited,
-  grossVehicleMassTonnes: Bound[PDecimal] = Unlimited,
-  notBeing: Seq[VehicleCategory] = Seq.empty,
-  seatingPositions: Bound[Nat] = Unlimited,
-  primaryPurpose: Purpose = Passenger,
-  steeringWheelPositionInVehicleLength: Bound[PDecimal] = Unlimited,
-  roadUse: RoadUse = OnRoadUse,
-)
-
-
-
-def topLevel = "This is a top level definition"
-type AlsoTopLevel = (String, Int)
-val AsAreVals = "..as are values"
-
-//In Scala 2, most people used sealed traits to model enumerations
-
-object Scala2 {
-  sealed trait Amount
-  case class Exact private (n: Int) extends Amount
-  case class Range private (min: Int, max: Int) extends Amount
-  case object Unspecified extends Amount
+  val values = IndexedSeq(
+    PedalCycle(),
+    PowerAssistedPedalCycle(),
+    Moped2Wheel(),
+    Motorcycle(),
+    MotorTricycle(),
+    PassengerCar(),
+    ForwardControlPassengerVehicle(),
+    OffRoadPassengerVehicle(),
+    LightGoodsVehicle(),
+    MediumGoodsVehicle(),
+    HeavyGoodsVehicle()
+  )
 }
 
-
-enum Amount {
-  case Exact (n: Nat) extends Amount
-  case Range private[enums] (min: Nat, max: Nat) extends Amount
-  case Unspecified extends Amount
-}
-object Amount {    
-
-  def range(min: Nat, max: Nat): Either[String, Amount] = 
-    Either.cond(min <= max, Amount.Range(min, max), s"Require min <= max: min=$min, max=$max. ")   
-}
-
-//follow the widespread convention of lower inclusive, upper exclusive bounds
-//means that maxExclusive aligns with collection size
-case class IndexOutOfBounds(index: Int, maxExclusive: Int, min: Int = 0)
-
-object Excercises {
-  //TODO: Define the VehicleType enum for 
-  //Cars, Trucks, Bicycles, Motocycles, and Other
-  //Each VehicleType should have a `wheels: Amount` parameter
-
-  enum VehicleType(wheels: Amount) {
-    case Car extends VehicleType(Amount.Exact(nat(4)))
-    //TODO Your code here
-  }
-
-  //TODO use the `values` method to resolve the item corresponding to the index, or an error
-  def vehicleType(index: Int): Either[IndexOutOfBounds, VehicleType] = ???
-}
