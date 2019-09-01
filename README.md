@@ -20,3 +20,5 @@ Assuming you have a recent JVM installed:
 3. run `sbt test` to download all the things
 
 It's best to do this on a fast internet connection before the conference, if you are able to. 
+
+## [Vehicle Classification Case Study](VehicleCategories.md)
