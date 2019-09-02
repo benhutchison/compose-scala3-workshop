@@ -15,9 +15,9 @@ import scala.annotation._
 export PDecimal.PDecimal
 export PDecimal.toPDecimal
 export PDecimal.toDecimal
-export PDecimal.+
-export PDecimal.*
-export PDecimal./
+// export PDecimal.+
+// export PDecimal.*
+// export PDecimal./
 
 
 object PDecimal {
