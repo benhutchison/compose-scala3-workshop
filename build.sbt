@@ -18,7 +18,7 @@ lazy val commonSettings = Seq(
 lazy val root = project
   .in(file("."))
   .dependsOn(nat).aggregate(nat)
-  .dependsOn(pdecimal).aggregate(pdecimal)
+  .dependsOn(pdecimal)
   .dependsOn(bound).aggregate(bound)
   .settings(
     name := "Melbourne :: Compose 2019 Scala 3 workshop",
